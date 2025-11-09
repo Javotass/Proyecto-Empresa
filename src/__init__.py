@@ -3,7 +3,7 @@ Sistema de detección de operaciones atípicas en transacciones financieras
 """
 
 __version__ = "1.0.0"
-__author__ = "Your Name"
+__author__ = "Javier Revilla"
 
 from .data_generator import TransactionDataGenerator
 from .data_processor import DataProcessor
