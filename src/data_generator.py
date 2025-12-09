@@ -7,6 +7,81 @@ import random
 class TransactionDataGenerator:
     """Generador de datos sintéticos de transacciones financieras con reglas controladas"""
     
+    # ========== CONSTANTES DE CONFIGURACIÓN ==========
+    
+    # Monedas disponibles
+    CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF']
+    
+    # Canales de transacción
+    CHANNELS = ['web', 'app', 'cajero', 'sucursal']
+    
+    # Tipos de dispositivo
+    DEVICES = ['desktop', 'mobile', 'tablet', 'atm', 'pos']
+    
+    # Países inusuales para detección de anomalías
+    UNUSUAL_COUNTRIES = ['RU', 'CN', 'KP', 'IR', 'SY', 'AF', 'YE', 'NG', 'PK']
+    
+    # Distribución de probabilidades para importes
+    LOW_RANGE_PROBABILITY = 0.70    # 70% transacciones en rango bajo
+    MEDIUM_RANGE_PROBABILITY = 0.95  # 95% acumulado hasta rango medio
+    # El 5% restante será rango alto
+    
+    # Multiplicadores de rango
+    LOW_RANGE_MULTIPLIER = 0.3
+    MEDIUM_RANGE_MIN_MULTIPLIER = 0.3
+    MEDIUM_RANGE_MAX_MULTIPLIER = 0.8
+    HIGH_RANGE_MIN_MULTIPLIER = 0.8
+    
+    # Límites de transacciones
+    MAX_TRANSACTION_AMOUNT = 100000
+    
+    # Configuración de clientes
+    MIN_CUSTOMERS = 100
+    TRANSACTIONS_PER_CUSTOMER = 50
+    ANOMALY_CUSTOMERS_RATIO = 10
+    
+    # Perfiles de cliente predefinidos
+    CUSTOMER_PROFILES = {
+        'low_spender': {
+            'typical_range': (10, 500),
+            'typical_hour_range': (9, 21),
+            'typical_countries': ['ES', 'FR', 'IT']
+        },
+        'medium_spender': {
+            'typical_range': (100, 3000),
+            'typical_hour_range': (8, 22),
+            'typical_countries': ['ES', 'FR', 'DE', 'IT', 'GB']
+        },
+        'high_spender': {
+            'typical_range': (1000, 15000),
+            'typical_hour_range': (8, 23),
+            'typical_countries': ['ES', 'FR', 'DE', 'IT', 'GB', 'US']
+        },
+        'business': {
+            'typical_range': (500, 25000),
+            'typical_hour_range': (7, 19),
+            'typical_countries': ['ES', 'FR', 'DE', 'US', 'GB', 'CH']
+        }
+    }
+    
+    # Tipos de anomalías
+    ANOMALY_TYPES = [
+        'high_amount_unusual_user',
+        'unusual_time',
+        'unusual_country',
+        'combined_anomaly'
+    ]
+    
+    # Umbrales para anomalías
+    LOW_SPENDER_THRESHOLD = 5000
+    HIGH_AMOUNT_MIN = 10000
+    UNUSUAL_HOURS = list(range(0, 6)) + [23]
+    
+    # Configuración temporal
+    DAYS_LOOKBACK = 365
+    
+    # ========== FIN DE CONSTANTES ==========
+    
     def __init__(self, n_transactions=10000, anomaly_ratio=0.05, seed=42):
         """
         Args:
@@ -28,33 +103,18 @@ class TransactionDataGenerator:
     def _create_customer_profile(self, customer_id):
         """Crea un perfil de comportamiento para un cliente"""
         # Tipos de cliente con diferentes patrones de gasto
-        customer_types = ['low_spender', 'medium_spender', 'high_spender', 'business']
+        customer_types = list(self.CUSTOMER_PROFILES.keys())
         customer_type = random.choice(customer_types)
         
-        # Definir rangos típicos según el tipo de cliente
-        if customer_type == 'low_spender':
-            typical_range = (10, 500)
-            typical_hour_range = (9, 21)
-            typical_countries = ['ES', 'FR', 'IT']
-        elif customer_type == 'medium_spender':
-            typical_range = (100, 3000)
-            typical_hour_range = (8, 22)
-            typical_countries = ['ES', 'FR', 'DE', 'IT', 'GB']
-        elif customer_type == 'high_spender':
-            typical_range = (1000, 15000)
-            typical_hour_range = (8, 23)
-            typical_countries = ['ES', 'FR', 'DE', 'IT', 'GB', 'US']
-        else:  # business
-            typical_range = (500, 25000)
-            typical_hour_range = (7, 19)
-            typical_countries = ['ES', 'FR', 'DE', 'US', 'GB', 'CH']
+        # Obtener configuración del perfil
+        profile_config = self.CUSTOMER_PROFILES[customer_type]
         
         profile = {
             'type': customer_type,
-            'typical_range': typical_range,
-            'typical_hour_range': typical_hour_range,
-            'typical_countries': typical_countries,
-            'home_country': random.choice(typical_countries),
+            'typical_range': profile_config['typical_range'],
+            'typical_hour_range': profile_config['typical_hour_range'],
+            'typical_countries': profile_config['typical_countries'],
+            'home_country': random.choice(profile_config['typical_countries']),
             'transaction_count': 0
         }
         
@@ -66,6 +126,8 @@ class TransactionDataGenerator:
         if customer_id not in self.customer_profiles:
             return self._create_customer_profile(customer_id)
         return self.customer_profiles[customer_id]
+    
+    def generate_dataset(self):
         """Genera el conjunto completo de transacciones"""
         n_anomalies = int(self.n_transactions * self.anomaly_ratio)
         n_normal = self.n_transactions - n_anomalies
@@ -90,61 +152,63 @@ class TransactionDataGenerator:
     
     def _generate_normal_transactions(self, n):
         """Genera transacciones normales siguiendo reglas controladas"""
-        n_customers = max(100, n // 50)  # Aproximadamente 50 transacciones por cliente
+        n_customers = max(self.MIN_CUSTOMERS, n // self.TRANSACTIONS_PER_CUSTOMER)
         customer_ids = [f"CUST{str(i).zfill(6)}" for i in range(n_customers)]
         
         transactions = []
-        start_date = datetime.now() - timedelta(days=365)
-        
-        currencies = ['EUR', 'USD', 'GBP', 'CHF']
-        channels = ['web', 'app', 'cajero', 'sucursal']
-        devices = ['desktop', 'mobile', 'tablet', 'atm', 'pos']
+        start_date = datetime.now() - timedelta(days=self.DAYS_LOOKBACK)
         
         for _ in range(n):
             customer_id = random.choice(customer_ids)
             profile = self._get_customer_profile(customer_id)
             profile['transaction_count'] += 1
             
-            # REGLA 1: Transacciones < 1000€ - frecuencia alta, riesgo bajo
-            # REGLA 2: Transacciones 1000-10000€ - moderadas
-            # REGLA 3: Transacciones 10000-100000€ - solo para clientes apropiados
-            
-            # Generar importe basado en el perfil del cliente (NO aleatorio)
+            # Generar importe basado en el perfil del cliente
             min_amount, max_amount = profile['typical_range']
+            range_span = max_amount - min_amount
             
-            # Distribución controlada: 70% en rango bajo, 25% medio, 5% alto del rango
+            # Distribución controlada usando constantes
             rand_val = random.random()
-            if rand_val < 0.70:
+            if rand_val < self.LOW_RANGE_PROBABILITY:
                 # Rango bajo del perfil
-                amount = round(random.uniform(min_amount, min_amount + (max_amount - min_amount) * 0.3), 2)
-            elif rand_val < 0.95:
+                amount = round(random.uniform(
+                    min_amount, 
+                    min_amount + range_span * self.LOW_RANGE_MULTIPLIER
+                ), 2)
+            elif rand_val < self.MEDIUM_RANGE_PROBABILITY:
                 # Rango medio del perfil
-                amount = round(random.uniform(min_amount + (max_amount - min_amount) * 0.3, 
-                                             min_amount + (max_amount - min_amount) * 0.8), 2)
+                amount = round(random.uniform(
+                    min_amount + range_span * self.MEDIUM_RANGE_MIN_MULTIPLIER,
+                    min_amount + range_span * self.MEDIUM_RANGE_MAX_MULTIPLIER
+                ), 2)
             else:
-                # Rango alto del perfil (solo ocasionalmente)
-                amount = round(random.uniform(min_amount + (max_amount - min_amount) * 0.8, max_amount), 2)
+                # Rango alto del perfil
+                amount = round(random.uniform(
+                    min_amount + range_span * self.HIGH_RANGE_MIN_MULTIPLIER,
+                    max_amount
+                ), 2)
             
-            # Limitar al rango 0-100000
-            amount = min(amount, 100000)
+            # Limitar al máximo permitido
+            amount = min(amount, self.MAX_TRANSACTION_AMOUNT)
             
-            # Horario típico del cliente (NO aleatorio)
+            # Horario típico del cliente
             hour_min, hour_max = profile['typical_hour_range']
             hour = random.randint(hour_min, hour_max)
             
             timestamp = start_date + timedelta(
-                days=random.randint(0, 365),
+                days=random.randint(0, self.DAYS_LOOKBACK),
                 hours=hour,
                 minutes=random.randint(0, 59)
             )
             
-            # País típico del cliente (NO aleatorio)
+            # País típico del cliente
             origin_country = profile['home_country']
             destination_country = random.choice(profile['typical_countries'])
             
-            currency = 'EUR' if origin_country in ['ES', 'FR', 'DE', 'IT'] else random.choice(currencies)
-            channel = random.choice(channels)
-            device_type = random.choice(devices)
+            # Seleccionar moneda según el país
+            currency = 'EUR' if origin_country in ['ES', 'FR', 'DE', 'IT'] else random.choice(self.CURRENCIES)
+            channel = random.choice(self.CHANNELS)
+            device_type = random.choice(self.DEVICES)
             
             transactions.append({
                 'transaction_id': None,
@@ -169,74 +233,61 @@ class TransactionDataGenerator:
           * Se realizan fuera del horario típico del cliente
           * Se hacen desde un país distinto al habitual
         """
-        n_customers = max(50, n // 10)
+        n_customers = max(self.MIN_CUSTOMERS // 2, n // self.ANOMALY_CUSTOMERS_RATIO)
         customer_ids = [f"CUST{str(i).zfill(6)}" for i in range(n_customers)]
         
         transactions = []
-        start_date = datetime.now() - timedelta(days=365)
-        
-        currencies = ['EUR', 'USD', 'GBP', 'CHF']
-        channels = ['web', 'app', 'cajero', 'sucursal']
-        devices = ['desktop', 'mobile', 'tablet', 'atm', 'pos']
-        unusual_countries = ['RU', 'CN', 'KP', 'IR', 'SY', 'AF', 'YE', 'NG', 'PK']
+        start_date = datetime.now() - timedelta(days=self.DAYS_LOOKBACK)
         
         for _ in range(n):
             customer_id = random.choice(customer_ids)
             profile = self._get_customer_profile(customer_id)
             
             # Tipo de anomalía según reglas
-            anomaly_type = random.choice([
-                'high_amount_unusual_user',      # Usuario que no suele hacer pagos grandes
-                'unusual_time',                  # Fuera del horario típico
-                'unusual_country',               # País distinto al habitual
-                'combined_anomaly'               # Múltiples factores anómalos
-            ])
+            anomaly_type = random.choice(self.ANOMALY_TYPES)
             
             # Inicializar con valores normales del cliente
             min_amount, max_amount = profile['typical_range']
             hour_min, hour_max = profile['typical_hour_range']
             origin_country = profile['home_country']
             destination_country = random.choice(profile['typical_countries'])
+            hour = random.randint(hour_min, hour_max)  # Inicializar hora por defecto
             
             # Aplicar reglas de anomalía
             if anomaly_type == 'high_amount_unusual_user':
-                # REGLA: Importe alto (>10000€) para usuario que normalmente no paga tanto
-                if max_amount < 5000:  # Cliente de gasto bajo/medio
-                    amount = round(random.uniform(10000, 100000), 2)
+                # REGLA: Importe alto para usuario que normalmente no paga tanto
+                if max_amount < self.LOW_SPENDER_THRESHOLD:
+                    amount = round(random.uniform(self.HIGH_AMOUNT_MIN, self.MAX_TRANSACTION_AMOUNT), 2)
                 else:
                     # Si ya es de gasto alto, exceder mucho su rango
-                    amount = round(random.uniform(max_amount * 2, 100000), 2)
+                    amount = round(random.uniform(max_amount * 2, self.MAX_TRANSACTION_AMOUNT), 2)
                     
             elif anomaly_type == 'unusual_time':
                 # REGLA: Horario inusual (fuera del patrón del cliente)
-                # Madrugada (0-5) o muy tarde (23-24)
-                hour = random.choice(list(range(0, 6)) + [23])
+                hour = random.choice(self.UNUSUAL_HOURS)
                 amount = round(random.uniform(max_amount * 0.5, max_amount * 3), 2)
                 
             elif anomaly_type == 'unusual_country':
                 # REGLA: País distinto al habitual
-                destination_country = random.choice(unusual_countries)
+                destination_country = random.choice(self.UNUSUAL_COUNTRIES)
                 amount = round(random.uniform(max_amount * 0.3, max_amount * 2), 2)
                 
             else:  # combined_anomaly
                 # REGLA: Combinación de factores anómalos
-                amount = round(random.uniform(15000, 100000), 2)
-                hour = random.choice(list(range(0, 6)) + [23])
-                destination_country = random.choice(unusual_countries)
+                amount = round(random.uniform(15000, self.MAX_TRANSACTION_AMOUNT), 2)
+                hour = random.choice(self.UNUSUAL_HOURS)
+                destination_country = random.choice(self.UNUSUAL_COUNTRIES)
             
             # Generar timestamp con la hora determinada
-            if 'hour' not in locals() or anomaly_type not in ['unusual_time', 'combined_anomaly']:
-                hour = random.randint(hour_min, hour_max)
-            
             timestamp = start_date + timedelta(
-                days=random.randint(0, 365),
+                days=random.randint(0, self.DAYS_LOOKBACK),
                 hours=hour,
                 minutes=random.randint(0, 59)
             )
             
-            currency = 'EUR' if origin_country in ['ES', 'FR', 'DE', 'IT'] else random.choice(currencies)
-            channel = random.choice(channels)
-            device_type = random.choice(devices)
+            currency = 'EUR' if origin_country in ['ES', 'FR', 'DE', 'IT'] else random.choice(self.CURRENCIES)
+            channel = random.choice(self.CHANNELS)
+            device_type = random.choice(self.DEVICES)
             
             transactions.append({
                 'transaction_id': None,
