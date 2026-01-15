@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 class DataProcessor:
-    """Procesamiento y transformación de datos de transacciones"""
+    """Procesamiento y transformacion de datos de transacciones"""
     
     def __init__(self):
         self.label_encoders = {}
@@ -26,21 +26,21 @@ class DataProcessor:
         # Eliminar valores nulos
         df = df.dropna()
         
-        # Extraer características temporales
+        # Extraer caracteristicas temporales
         df['hour'] = df['timestamp'].dt.hour
         df['day_of_week'] = df['timestamp'].dt.dayofweek
         df['day_of_month'] = df['timestamp'].dt.day
         df['month'] = df['timestamp'].dt.month
         
-        # Calcular características agregadas por cliente
+        # Calcular caracteristicas agregadas por cliente
         df = self._add_customer_features(df)
         
         print("Preprocesamiento completado")
         return df
     
     def _add_customer_features(self, df):
-        """Añade características derivadas del comportamiento del cliente"""
-        print("Calculando características por cliente...")
+        """Anade caracteristicas derivadas del comportamiento del cliente"""
+        print("Calculando caracteristicas por cliente...")
         
         customer_stats = df.groupby('customer_id').agg({
             'amount': ['mean', 'std', 'min', 'max', 'count'],
@@ -64,13 +64,13 @@ class DataProcessor:
         
         df = df.merge(customer_stats, on='customer_id', how='left')
         
-        # Calcular desviación de la transacción respecto al comportamiento del cliente
+        # Calcular desviacion de la transaccion respecto al comportamiento del cliente
         df['amount_deviation'] = (df['amount'] - df['customer_avg_amount']) / (df['customer_std_amount'] + 1e-6)
         
         return df
     
     def encode_features(self, df):
-        """Codifica variables categóricas"""
+        """Codifica variables categoricas"""
         df = df.copy()
         
         categorical_cols = ['currency', 'origin_country', 'destination_country', 'channel', 'device_type']
@@ -85,7 +85,7 @@ class DataProcessor:
         return df
     
     def prepare_features(self, df):
-        """Prepara el conjunto de características para el modelo"""
+        """Prepara el conjunto de caracteristicas para el modelo"""
         feature_columns = [
             'amount',
             'hour',
@@ -111,7 +111,7 @@ class DataProcessor:
         return X
     
     def scale_features(self, X, fit=True):
-        """Normaliza las características"""
+        """Normaliza las caracteristicas"""
         if fit:
             X_scaled = self.scaler.fit_transform(X)
         else:

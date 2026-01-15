@@ -5,26 +5,26 @@ from datetime import datetime, timedelta
 import random
 
 class TransactionDataGenerator:
-    """Generador de datos sintéticos de transacciones financieras con reglas controladas"""
+    """Generador de datos sinteticos de transacciones financieras con reglas controladas"""
     
-    # ========== CONSTANTES DE CONFIGURACIÓN ==========
+    # ========== CONSTANTES DE CONFIGURACION ==========
     
     # Monedas disponibles
     CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF']
     
-    # Canales de transacción
+    # Canales de transaccion
     CHANNELS = ['web', 'app', 'cajero', 'sucursal']
     
     # Tipos de dispositivo
     DEVICES = ['desktop', 'mobile', 'tablet', 'atm', 'pos']
     
-    # Países inusuales para detección de anomalías
+    # Paises inusuales para deteccion de anomalias
     UNUSUAL_COUNTRIES = ['RU', 'CN', 'KP', 'IR', 'SY', 'AF', 'YE', 'NG', 'PK']
     
-    # Distribución de probabilidades para importes
+    # Distribucion de probabilidades para importes
     LOW_RANGE_PROBABILITY = 0.70    # 70% transacciones en rango bajo
     MEDIUM_RANGE_PROBABILITY = 0.95  # 95% acumulado hasta rango medio
-    # El 5% restante será rango alto
+    # El 5% restante sera rango alto
     
     # Multiplicadores de rango
     LOW_RANGE_MULTIPLIER = 0.3
@@ -32,10 +32,10 @@ class TransactionDataGenerator:
     MEDIUM_RANGE_MAX_MULTIPLIER = 0.8
     HIGH_RANGE_MIN_MULTIPLIER = 0.8
     
-    # Límites de transacciones
+    # Limites de transacciones
     MAX_TRANSACTION_AMOUNT = 100000
     
-    # Configuración de clientes
+    # Configuracion de clientes
     MIN_CUSTOMERS = 100
     TRANSACTIONS_PER_CUSTOMER = 50
     ANOMALY_CUSTOMERS_RATIO = 10
@@ -64,7 +64,7 @@ class TransactionDataGenerator:
         }
     }
     
-    # Tipos de anomalías
+    # Tipos de anomalias
     ANOMALY_TYPES = [
         'high_amount_unusual_user',
         'unusual_time',
@@ -72,12 +72,12 @@ class TransactionDataGenerator:
         'combined_anomaly'
     ]
     
-    # Umbrales para anomalías
+    # Umbrales para anomalias
     LOW_SPENDER_THRESHOLD = 5000
     HIGH_AMOUNT_MIN = 10000
     UNUSUAL_HOURS = list(range(0, 6)) + [23]
     
-    # Configuración temporal
+    # Configuracion temporal
     DAYS_LOOKBACK = 365
     
     # ========== FIN DE CONSTANTES ==========
@@ -85,8 +85,8 @@ class TransactionDataGenerator:
     def __init__(self, n_transactions=10000, anomaly_ratio=0.05, seed=42):
         """
         Args:
-            n_transactions: Número total de transacciones a generar
-            anomaly_ratio: Proporción de transacciones anómalas (0-1)
+            n_transactions: Numero total de transacciones a generar
+            anomaly_ratio: Proporcion de transacciones anomalas (0-1)
             seed: Semilla para reproducibilidad
         """
         self.n_transactions = n_transactions
@@ -106,7 +106,7 @@ class TransactionDataGenerator:
         customer_types = list(self.CUSTOMER_PROFILES.keys())
         customer_type = random.choice(customer_types)
         
-        # Obtener configuración del perfil
+        # Obtener configuracion del perfil
         profile_config = self.CUSTOMER_PROFILES[customer_type]
         
         profile = {
@@ -132,19 +132,19 @@ class TransactionDataGenerator:
         n_anomalies = int(self.n_transactions * self.anomaly_ratio)
         n_normal = self.n_transactions - n_anomalies
         
-        print(f"Generando {n_normal} transacciones normales y {n_anomalies} anómalas...")
+        print(f"Generando {n_normal} transacciones normales y {n_anomalies} anomalas...")
         
         # Generar transacciones normales
         normal_transactions = self._generate_normal_transactions(n_normal)
         
-        # Generar transacciones anómalas
+        # Generar transacciones anomalas
         anomaly_transactions = self._generate_anomaly_transactions(n_anomalies)
         
         # Combinar y mezclar
         all_transactions = pd.concat([normal_transactions, anomaly_transactions], ignore_index=True)
         all_transactions = all_transactions.sample(frac=1, random_state=self.seed).reset_index(drop=True)
         
-        # Asignar IDs únicos
+        # Asignar IDs unicos
         all_transactions['transaction_id'] = [f"TXN{str(i).zfill(8)}" for i in range(len(all_transactions))]
         
         print(f"Dataset generado: {len(all_transactions)} transacciones")
@@ -167,7 +167,7 @@ class TransactionDataGenerator:
             min_amount, max_amount = profile['typical_range']
             range_span = max_amount - min_amount
             
-            # Distribución controlada usando constantes
+            # Distribucion controlada usando constantes
             rand_val = random.random()
             if rand_val < self.LOW_RANGE_PROBABILITY:
                 # Rango bajo del perfil
@@ -188,10 +188,10 @@ class TransactionDataGenerator:
                     max_amount
                 ), 2)
             
-            # Limitar al máximo permitido
+            # Limitar al maximo permitido
             amount = min(amount, self.MAX_TRANSACTION_AMOUNT)
             
-            # Horario típico del cliente
+            # Horario tipico del cliente
             hour_min, hour_max = profile['typical_hour_range']
             hour = random.randint(hour_min, hour_max)
             
@@ -201,11 +201,11 @@ class TransactionDataGenerator:
                 minutes=random.randint(0, 59)
             )
             
-            # País típico del cliente
+            # Pais tipico del cliente
             origin_country = profile['home_country']
             destination_country = random.choice(profile['typical_countries'])
             
-            # Seleccionar moneda según el país
+            # Seleccionar moneda segun el pais
             currency = 'EUR' if origin_country in ['ES', 'FR', 'DE', 'IT'] else random.choice(self.CURRENCIES)
             channel = random.choice(self.CHANNELS)
             device_type = random.choice(self.DEVICES)
@@ -227,11 +227,11 @@ class TransactionDataGenerator:
     
     def _generate_anomaly_transactions(self, n):
         """
-        Genera transacciones anómalas siguiendo reglas específicas:
-        - Importes > 10000-100000€ marcados como anómalos si:
+        Genera transacciones anomalas siguiendo reglas especificas:
+        - Importes > 10000-100000€ marcados como anomalos si:
           * El usuario no suele hacer pagos grandes
-          * Se realizan fuera del horario típico del cliente
-          * Se hacen desde un país distinto al habitual
+          * Se realizan fuera del horario tipico del cliente
+          * Se hacen desde un pais distinto al habitual
         """
         n_customers = max(self.MIN_CUSTOMERS // 2, n // self.ANOMALY_CUSTOMERS_RATIO)
         customer_ids = [f"CUST{str(i).zfill(6)}" for i in range(n_customers)]
@@ -243,7 +243,7 @@ class TransactionDataGenerator:
             customer_id = random.choice(customer_ids)
             profile = self._get_customer_profile(customer_id)
             
-            # Tipo de anomalía según reglas
+            # Tipo de anomalia segun reglas
             anomaly_type = random.choice(self.ANOMALY_TYPES)
             
             # Inicializar con valores normales del cliente
@@ -253,7 +253,7 @@ class TransactionDataGenerator:
             destination_country = random.choice(profile['typical_countries'])
             hour = random.randint(hour_min, hour_max)  # Inicializar hora por defecto
             
-            # Aplicar reglas de anomalía
+            # Aplicar reglas de anomalia
             if anomaly_type == 'high_amount_unusual_user':
                 # REGLA: Importe alto para usuario que normalmente no paga tanto
                 if max_amount < self.LOW_SPENDER_THRESHOLD:
@@ -263,17 +263,17 @@ class TransactionDataGenerator:
                     amount = round(random.uniform(max_amount * 2, self.MAX_TRANSACTION_AMOUNT), 2)
                     
             elif anomaly_type == 'unusual_time':
-                # REGLA: Horario inusual (fuera del patrón del cliente)
+                # REGLA: Horario inusual (fuera del patron del cliente)
                 hour = random.choice(self.UNUSUAL_HOURS)
                 amount = round(random.uniform(max_amount * 0.5, max_amount * 3), 2)
                 
             elif anomaly_type == 'unusual_country':
-                # REGLA: País distinto al habitual
+                # REGLA: Pais distinto al habitual
                 destination_country = random.choice(self.UNUSUAL_COUNTRIES)
                 amount = round(random.uniform(max_amount * 0.3, max_amount * 2), 2)
                 
             else:  # combined_anomaly
-                # REGLA: Combinación de factores anómalos
+                # REGLA: Combinacion de factores anomalos
                 amount = round(random.uniform(15000, self.MAX_TRANSACTION_AMOUNT), 2)
                 hour = random.choice(self.UNUSUAL_HOURS)
                 destination_country = random.choice(self.UNUSUAL_COUNTRIES)

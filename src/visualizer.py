@@ -4,26 +4,26 @@ import pandas as pd
 import numpy as np
 
 class ResultVisualizer:
-    """Visualización de resultados del modelo"""
+    """Visualizacion de resultados del modelo"""
     
     def __init__(self, style='darkgrid'):
         sns.set_style(style)
         plt.rcParams['figure.figsize'] = (12, 6)
         
     def plot_anomaly_scores(self, scores, is_anomaly=None, save_path=None):
-        """Histograma de puntuaciones de anomalía"""
+        """Histograma de puntuaciones de anomalia"""
         fig, ax = plt.subplots(1, 1, figsize=(10, 6))
         
         if is_anomaly is not None:
             ax.hist(scores[is_anomaly == 0], bins=50, alpha=0.7, label='Normal', color='green')
-            ax.hist(scores[is_anomaly == 1], bins=50, alpha=0.7, label='Anomalía', color='red')
+            ax.hist(scores[is_anomaly == 1], bins=50, alpha=0.7, label='Anomalia', color='red')
             ax.legend()
         else:
             ax.hist(scores, bins=50, alpha=0.7, color='blue')
         
-        ax.set_xlabel('Puntuación de Anomalía')
+        ax.set_xlabel('Puntuacion de Anomalia')
         ax.set_ylabel('Frecuencia')
-        ax.set_title('Distribución de Puntuaciones de Anomalía')
+        ax.set_title('Distribucion de Puntuaciones de Anomalia')
         ax.grid(True, alpha=0.3)
         
         if save_path:
@@ -53,16 +53,16 @@ class ResultVisualizer:
         plt.show()
         
     def plot_confusion_matrix(self, cm, save_path=None):
-        """Mapa de calor de la matriz de confusión"""
+        """Mapa de calor de la matriz de confusion"""
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
         
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
-                    xticklabels=['Normal', 'Anomalía'],
-                    yticklabels=['Normal', 'Anomalía'])
+                    xticklabels=['Normal', 'Anomalia'],
+                    yticklabels=['Normal', 'Anomalia'])
         
         ax.set_ylabel('Valor Real')
         ax.set_xlabel('Valor Predicho')
-        ax.set_title('Matriz de Confusión')
+        ax.set_title('Matriz de Confusion')
         
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
@@ -78,7 +78,7 @@ class ResultVisualizer:
         
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 8))
         
-        # Gráfico de importes
+        # Grafico de importes
         colors = ['red' if x == 1 else 'green' for x in customer_data['is_anomaly']]
         ax1.scatter(customer_data['timestamp'], customer_data['amount'], 
                    c=colors, alpha=0.6, s=100)
@@ -86,12 +86,12 @@ class ResultVisualizer:
         ax1.set_title(f'Transacciones del Cliente {customer_id}')
         ax1.grid(True, alpha=0.3)
         
-        # Gráfico de frecuencia
+        # Grafico de frecuencia
         customer_data['date'] = customer_data['timestamp'].dt.date
         daily_counts = customer_data.groupby('date').size()
         ax2.plot(daily_counts.index, daily_counts.values, marker='o', linewidth=2)
         ax2.set_xlabel('Fecha')
-        ax2.set_ylabel('Número de Transacciones')
+        ax2.set_ylabel('Numero de Transacciones')
         ax2.set_title('Frecuencia Diaria de Transacciones')
         ax2.grid(True, alpha=0.3)
         
@@ -101,15 +101,15 @@ class ResultVisualizer:
         plt.show()
         
     def plot_country_heatmap(self, df, save_path=None):
-        """Mapa de calor de transacciones por país"""
+        """Mapa de calor de transacciones por pais"""
         country_matrix = pd.crosstab(df['origin_country'], df['destination_country'])
         
         fig, ax = plt.subplots(1, 1, figsize=(12, 10))
         sns.heatmap(country_matrix, annot=True, fmt='d', cmap='YlOrRd', ax=ax)
         
-        ax.set_title('Matriz de Transacciones por País (Origen vs Destino)')
-        ax.set_xlabel('País de Destino')
-        ax.set_ylabel('País de Origen')
+        ax.set_title('Matriz de Transacciones por Pais (Origen vs Destino)')
+        ax.set_xlabel('Pais de Destino')
+        ax.set_ylabel('Pais de Origen')
         
         plt.tight_layout()
         if save_path:

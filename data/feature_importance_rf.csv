@@ -1,0 +1,17 @@
+Feature,Importance
+customer_std_amount,0.26460004486282357
+amount_deviation,0.18007310722355233
+customer_unique_countries,0.1778368792249539
+amount,0.1448271561173896
+customer_avg_amount,0.0538891354874237
+hour,0.052708710581407914
+destination_country_encoded,0.05144078147154337
+customer_transaction_count,0.0343600528062394
+day_of_month,0.011279532479439365
+month,0.0072434206594395025
+origin_country_encoded,0.00651109043926438
+day_of_week,0.0050716901720519346
+device_type_encoded,0.004234580338627895
+channel_encoded,0.004147143527065766
+currency_encoded,0.0017766746087774135
+customer_unique_channels,0.0
