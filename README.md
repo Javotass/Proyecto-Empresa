@@ -4,69 +4,69 @@ Sistema completo de detección de fraude en transacciones financieras utilizando
 
 ## 📋 Características Principales
 
-### ✅ Funcionalidades Implementadas (12/12 Requisitos Cumplidos)
+### ✅ Funcionalidades Implementadas
 
-1. **Generación y obtención de datos** ✅
+1. **Generación y obtención de datos** 
    - Generación de datasets sintéticos realistas con `faker`
    - Simulación de transacciones normales y fraudulentas
    - Importación de datos desde CSV externos
    - Etiquetado claro de fraude/no fraude
 
-2. **Gestión y preparación de datos** ✅
+2. **Gestión y preparación de datos** 
    - Normalización y transformación de variables
    - Eliminación de inconsistencias y valores erróneos
    - Tratamiento de desbalanceo de clases
    - Encoding de variables categóricas
 
-3. **Análisis exploratorio completo** ✅
+3. **Análisis exploratorio completo** 
    - Análisis de distribuciones de importes y frecuencias
    - Patrones temporales (hora, día, semana)
    - Comportamiento por usuario
    - Detección de outliers estadísticos
    - Matrices de correlación
 
-4. **División del dataset** ✅
+4. **División del dataset** 
    - Separación train/test (70/30)
    - Estratificación para mantener proporciones
    - Evaluación objetiva del rendimiento
 
-5. **Múltiples modelos predictivos** ✅
+5. **Múltiples modelos predictivos** 
    - **No supervisados**: Isolation Forest, Local Outlier Factor
    - **Supervisados**: Random Forest, Regresión Logística, Árbol de Decisión
    - Comparación automática de rendimiento
 
-6. **Ajuste y validación** ✅
+6. **Ajuste y validación** 
    - Optimización de hiperparámetros con GridSearchCV
    - Validación cruzada (k-fold)
    - Métricas completas: Precision, Recall, F1-Score, AUC, Matriz de Confusión
 
-7. **Sistema de alertas** ✅
+7. **Sistema de alertas** 
    - Clasificación por nivel de riesgo (CRÍTICO/ALTO/MEDIO)
    - Generación automática de reportes
    - Identificación de transacciones sospechosas
 
-8. **Monitorización y registro** ✅
+8. **Monitorización y registro** 
    - Registro completo de transacciones analizadas
    - Trazabilidad de decisiones
    - Histórico de alertas
 
-9. **Interpretabilidad** ✅
+9. **Interpretabilidad** 
    - Análisis de importancia de características
    - Visualización de variables influyentes
    - Explicación de detecciones
 
-10. **Visualización avanzada** ✅
+10. **Visualización avanzada** 
     - Curvas ROC, Matrices de confusión
     - Distribuciones de anomalías
     - Patrones temporales, Mapas de calor geográficos
     - Timeline de clientes
 
-11. **Arquitectura modular** ✅
+11. **Arquitectura modular** 
     - Sistema completamente modular
     - Fácil sustitución de modelos
     - Escalable y extensible
 
-12. **Documentación completa** ✅
+12. **Documentación completa** 
     - Código documentado
     - README detallado
     - Resultados exportados
